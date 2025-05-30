@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import numpy as np
 import os
+import math
 
 app = Flask(__name__)
 
@@ -13,26 +14,49 @@ def index():
         try:
             raw_data = request.form['raw_data']
             rows = raw_data.strip().split('\n')
+
             matrix = []
+            for i in range(8):  # Always 8 rows
+                if i < len(rows):
+                    values = rows[i].strip().split()
+                else:
+                    values = []
 
-            for row in rows:
-                values = [float(x.strip()) for x in row.strip().split()]
-                matrix.append(values)
+                row_values = []
+                for j in range(12):  # Always 12 columns
+                    if j < len(values):
+                        try:
+                            val = float(values[j])
+                        except ValueError:
+                            val = None  # Non-numeric treated as blank
+                        row_values.append(val)
+                    else:
+                        row_values.append(None)  # Missing cell
 
-            data = np.array(matrix)
+                matrix.append(row_values)
 
-            if data.shape != (8, 12):
-                raise ValueError("Input must be 8 rows by 12 columns")
+            data = np.array(matrix, dtype=float)
 
-            # Use the average of the first two cells in column 1 (A1, B1)
-            pos_ctrl_mean = np.mean([data[0][0], data[1][0]])
+            # Extract positive controls (first two cells in first column)
+            pos_ctrl_vals = [v for v in [data[0,0], data[1,0]] if not math.isnan(v)]
+            if len(pos_ctrl_vals) < 2:
+                raise ValueError("Positive controls (first two cells in first column) must be numeric")
 
-            normalized = data / pos_ctrl_mean
+            pos_ctrl_mean = sum(pos_ctrl_vals) / len(pos_ctrl_vals)
 
-            # Format the output for pasting into Excel (tab-separated)
-            normalized_result = "\n".join(
-                ["\t".join(f"{val:.3f}" for val in row) for row in normalized]
-            )
+            # Normalize numeric cells, keep blanks as empty strings
+            normalized = []
+            for row in data:
+                norm_row = []
+                for val in row:
+                    if math.isnan(val):
+                        norm_row.append("")
+                    else:
+                        norm_row.append(f"{val / pos_ctrl_mean:.3f}")
+                normalized.append(norm_row)
+
+            # Format output for Excel: tab separated
+            normalized_result = "\n".join(["\t".join(row) for row in normalized])
 
         except Exception as e:
             error = str(e)
