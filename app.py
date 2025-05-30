@@ -6,23 +6,39 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    normalized_data = ''
+    normalized_result = None
+    error = None
+
     if request.method == 'POST':
-        raw_data = request.form['data']
         try:
-            rows = [line.strip().split() for line in raw_data.strip().split('\n')]
-            matrix = np.array(rows, dtype=float)
+            raw_data = request.form['raw_data']
+            rows = raw_data.strip().split('\n')
+            matrix = []
 
-            pos_controls = matrix[0:2, 0]  # A1 and B1
-            mean_pos = np.mean(pos_controls)
-            norm_matrix = matrix / mean_pos
+            for row in rows:
+                values = [float(x.strip()) for x in row.strip().split()]
+                matrix.append(values)
 
-            normalized_data = '\n'.join(['\t'.join(f'{val:.3f}' for val in row) for row in norm_matrix])
+            data = np.array(matrix)
+
+            if data.shape != (8, 12):
+                raise ValueError("Input must be 8 rows by 12 columns")
+
+            # Use the average of the first two cells in column 1 (A1, B1)
+            pos_ctrl_mean = np.mean([data[0][0], data[1][0]])
+
+            normalized = data / pos_ctrl_mean
+
+            # Format the output for pasting into Excel (tab-separated)
+            normalized_result = "\n".join(
+                ["\t".join(f"{val:.3f}" for val in row) for row in normalized]
+            )
+
         except Exception as e:
-            normalized_data = f'Error: {e}'
+            error = str(e)
 
-    return render_template('index.html', normalized=normalized_data)
+    return render_template("index.html", result=normalized_result, error=error)
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))  # Use Render's port
+    port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
