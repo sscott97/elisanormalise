@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ELISA Normalizer</title>
+</head>
+<body>
+    <h1>Paste ELISA 8x12 Data</h1>
+    <form method="post">
+        <textarea name="data" rows="10" cols="100" placeholder="Paste 8x12 values here, separated by spaces or tabs"></textarea><br>
+        <button type="submit">Normalize</button>
+    </form>
+
+    {% if normalized %}
+        <h2>Normalized Data (copy to Excel)</h2>
+        <textarea rows="10" cols="100" readonly>{{ normalized }}</textarea>
+    {% endif %}
+</body>
+</html>
