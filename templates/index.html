@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ELISA Normalizer</title>
+    <title>ELISA Normaliser</title>
     <style>
         body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
         textarea { width: 100%; height: 200px; font-family: monospace; }
@@ -20,7 +20,7 @@
     </style>
 </head>
 <body>
-    <h1>ELISA Normalizer</h1>
+    <h1>ELISA Ratio Normaliser</h1>
     <form method="POST">
         <label for="raw_data">Paste 8×12 data (tab or space separated):</label><br>
         <textarea name="raw_data" required>{{ request.form.get('raw_data', '') }}</textarea><br><br>
@@ -32,7 +32,7 @@
     {% endif %}
 
     {% if result %}
-    <h2>Normalized Output</h2>
+    <h2>Normalised Ratio Output</h2>
     <pre id="output">{{ result }}</pre>
     <button class="copy-btn" onclick="copyOutput()">Copy to Clipboard</button>
     {% endif %}
