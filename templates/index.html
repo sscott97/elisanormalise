@@ -1,51 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>ELISA Normaliser</title>
+    <meta charset="UTF-8">
+    <title>ELISA Ratio Normaliser</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
-        textarea { width: 100%; height: 200px; font-family: monospace; }
-        pre {
-          background: #f4f4f4; padding: 10px; border-radius: 5px;
-          overflow-x: auto; white-space: pre-wrap; /* wrap lines if needed */
-          font-family: monospace;
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', sans-serif;
         }
-        .error { color: red; }
-        button.copy-btn {
-          margin-top: 10px;
-          padding: 8px 16px;
-          font-size: 1rem;
-          cursor: pointer;
+        textarea {
+            font-family: monospace;
+            resize: vertical;
+        }
+        .result-box {
+            white-space: pre-wrap;
+            font-family: monospace;
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
         }
     </style>
 </head>
 <body>
-    <h1>ELISA Ratio Normaliser</h1>
-    <form method="POST">
-        <label for="raw_data">Paste 8×12 data (tab or space separated):</label><br>
-        <textarea name="raw_data" required>{{ request.form.get('raw_data', '') }}</textarea><br><br>
-        <button type="submit">Normalize</button>
-    </form>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">ELISA Ratio Normaliser</h2>
 
-    {% if error %}
-    <p class="error">Error: {{ error }}</p>
-    {% endif %}
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="raw_data" class="form-label">Paste 8×12 Plate Data (space or tab-separated):</label>
+                            <textarea class="form-control" id="raw_data" name="raw_data" rows="10" required>{{ request.form.get('raw_data', '') }}</textarea>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Normalise Ratio</button>
+                        </div>
+                    </form>
 
-    {% if result %}
-    <h2>Normalised Ratio Output</h2>
-    <pre id="output">{{ result }}</pre>
-    <button class="copy-btn" onclick="copyOutput()">Copy to Clipboard</button>
-    {% endif %}
+                    {% if error %}
+                        <div class="alert alert-danger mt-4" role="alert">
+                            <strong>Error:</strong> {{ error }}
+                        </div>
+                    {% endif %}
 
-    <script>
-        function copyOutput() {
-            const outputText = document.getElementById('output').innerText;
-            navigator.clipboard.writeText(outputText).then(() => {
-                alert('Copied normalized data to clipboard!');
-            }).catch(err => {
-                alert('Failed to copy text: ' + err);
-            });
-        }
-    </script>
+                    {% if result %}
+                        <div class="mt-4">
+                            <h5>Normalised Output:</h5>
+                            <div class="result-box" id="output">{{ result }}</div>
+                            <button class="btn btn-outline-secondary mt-2" onclick="copyOutput()">Copy to Clipboard</button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function copyOutput() {
+        const outputText = document.getElementById('output').innerText;
+        navigator.clipboard.writeText(outputText).then(() => {
+            alert('Copied normalized data to clipboard!');
+        }).catch(err => {
+            alert('Failed to copy text: ' + err);
+        });
+    }
+</script>
 </body>
 </html>
